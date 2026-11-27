@@ -50,10 +50,7 @@ export async function signup(_: AuthState, formData: FormData): Promise<AuthStat
   if (password.length < 6) return { error: "비밀번호는 6자 이상이어야 합니다." };
   if (password !== passwordConfirm) return { error: "비밀번호가 서로 다릅니다." };
 
-  const h = await headers();
-  const origin =
-    h.get("origin") ??
-    `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  const origin = await getOrigin();
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
@@ -74,6 +71,53 @@ export async function signup(_: AuthState, formData: FormData): Promise<AuthStat
   return {
     message: `${email} 주소로 인증 메일을 보냈습니다. 메일의 링크를 누르면 가입이 완료됩니다.`,
   };
+}
+
+async function getOrigin() {
+  const h = await headers();
+  return h.get("origin") ?? `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+}
+
+// 비밀번호 재설정 메일 요청. 가입 여부를 노출하지 않도록 결과 문구는 항상 같게.
+export async function requestPasswordReset(_: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) return { error: "이메일을 입력해 주세요." };
+
+  const origin = await getOrigin();
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/confirm?next=${encodeURIComponent("/account/password?reset=1")}`,
+  });
+  if (error && /rate limit/i.test(error.message)) {
+    return { error: translateAuthError(error.message) };
+  }
+  return {
+    message: `${email} 주소로 가입된 계정이 있다면 비밀번호 재설정 메일을 보냈습니다. 메일의 링크는 이 브라우저에서 열어 주세요.`,
+  };
+}
+
+// 새 비밀번호 저장 (로그인 상태 또는 재설정 링크로 들어온 상태에서만 가능)
+export async function updatePassword(_: AuthState, formData: FormData): Promise<AuthState> {
+  const password = String(formData.get("password") ?? "");
+  const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
+  if (password.length < 6) return { error: "비밀번호는 6자 이상이어야 합니다." };
+  if (password !== passwordConfirm) return { error: "비밀번호가 서로 다릅니다." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "로그인이 만료되었습니다. 다시 로그인하거나 재설정 메일을 다시 요청해 주세요." };
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    if (/different from the old/i.test(error.message))
+      return { error: "이전과 다른 비밀번호를 입력해 주세요." };
+    if (/weak|short|characters/i.test(error.message))
+      return { error: "비밀번호가 너무 약합니다. 더 길고 복잡하게 만들어 주세요." };
+    return { error: translateAuthError(error.message) };
+  }
+  return { message: "비밀번호를 변경했습니다." };
 }
 
 export async function logout() {

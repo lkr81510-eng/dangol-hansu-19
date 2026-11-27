@@ -31,6 +31,13 @@ export const getViewer = cache(async (): Promise<Viewer> => {
   };
 });
 
+// 로그인 필요 화면 진입 시 사용
+export async function requireUser(next: string) {
+  const viewer = await getViewer();
+  if (!viewer) redirect(`/login?next=${encodeURIComponent(next)}`);
+  return viewer;
+}
+
 // 관리자 전용 화면/액션 진입 시 사용 (최종 방어는 RLS)
 export async function requireAdmin() {
   const viewer = await getViewer();

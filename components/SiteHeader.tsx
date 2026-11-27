@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { getViewer } from "@/lib/auth";
-import { logout } from "@/app/auth/actions";
 import Logo from "./Logo";
+import UserMenu from "./UserMenu";
 import HeaderSearch from "./HeaderSearch";
 import HeaderCategoryNav from "./HeaderCategoryNav";
 
@@ -23,21 +23,11 @@ export default async function SiteHeader() {
 
         <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
           {viewer ? (
-            <>
-              <span className="hidden max-w-40 truncate text-sm text-stone-600 lg:inline">
-                {viewer.isAdmin && (
-                  <span className="mr-1.5 rounded-md bg-brand-50 px-1.5 py-0.5 text-xs font-semibold text-brand-700">
-                    관리자
-                  </span>
-                )}
-                {viewer.nickname ?? viewer.email}님
-              </span>
-              <form action={logout}>
-                <button type="submit" className="rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100">
-                  로그아웃
-                </button>
-              </form>
-            </>
+            <UserMenu
+              name={viewer.nickname || viewer.email?.split("@")[0] || "회원"}
+              email={viewer.email}
+              isAdmin={viewer.isAdmin}
+            />
           ) : (
             <>
               <Link href="/login" className="rounded-lg px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100">

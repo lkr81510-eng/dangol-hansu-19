@@ -46,6 +46,13 @@ export default function AuthForm({ mode, next }: { mode: "login" | "signup"; nex
           className="field"
           placeholder={isSignup ? "6자 이상" : ""}
         />
+        {!isSignup && (
+          <p className="mt-1.5 text-right">
+            <Link href="/forgot-password" className="text-xs text-stone-500 hover:text-brand-700 hover:underline">
+              비밀번호를 잊으셨나요?
+            </Link>
+          </p>
+        )}
       </div>
       {isSignup && (
         <div>
