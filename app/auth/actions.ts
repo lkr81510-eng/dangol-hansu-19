@@ -64,6 +64,13 @@ export async function signup(_: AuthState, formData: FormData): Promise<AuthStat
   });
   if (error) return { error: translateAuthError(error.message) };
 
+  // 이미 가입된 이메일이면 Supabase는 오류 없이 identities가 빈 사용자를 돌려주고 메일은 보내지 않음
+  if (data.user && data.user.identities?.length === 0) {
+    return {
+      error: "이미 가입된 이메일입니다. 로그인하거나, 비밀번호가 기억나지 않으면 비밀번호 찾기를 이용해 주세요.",
+    };
+  }
+
   if (data.session) {
     revalidatePath("/", "layout");
     redirect("/");
