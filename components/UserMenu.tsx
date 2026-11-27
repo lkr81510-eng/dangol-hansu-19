@@ -17,6 +17,8 @@ export default function UserMenu({
   isAdmin: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  // 닉네임이 이미 "님"으로 끝나면 덧붙이지 않음 (예: "점심단골님" → "점심단골님")
+  const honorific = name.endsWith("님") ? name : `${name}님`;
   const ref = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const pathname = usePathname();
@@ -59,7 +61,7 @@ export default function UserMenu({
         {isAdmin && (
           <span className="rounded-md bg-brand-50 px-1.5 py-0.5 text-[11px] font-semibold text-brand-700">관리자</span>
         )}
-        <span className="hidden max-w-32 truncate sm:inline">{name}님</span>
+        <span className="hidden max-w-32 truncate sm:inline">{honorific}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true" className={`transition ${open ? "rotate-180" : ""}`}>
           <path d="m6 9 6 6 6-6" />
         </svg>
@@ -72,7 +74,7 @@ export default function UserMenu({
           className="absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-2xl border border-stone-200 bg-white py-1.5 shadow-lg"
         >
           <div className="border-b border-stone-100 px-4 pt-2 pb-3">
-            <p className="truncate text-sm font-semibold text-stone-900">{name}님</p>
+            <p className="truncate text-sm font-semibold text-stone-900">{honorific}</p>
             {email && <p className="truncate text-xs text-stone-500">{email}</p>}
           </div>
           <Link role="menuitem" href="/account" className="block px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50">

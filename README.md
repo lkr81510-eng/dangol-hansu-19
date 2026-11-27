@@ -5,6 +5,11 @@
 식당 단골이 자문단이 되어 의견을 내고, 할인 소식을 먼저 받는 서비스입니다.
 현재는 **식당 1곳 전용**으로 운영합니다.
 
+**배포 주소: https://dangol-hansu-19.vercel.app**
+
+- 누구나 공지사항을 볼 수 있고, 회원가입 후 로그인할 수 있습니다.
+- 공지 작성·수정·삭제는 관리자 계정에서만 가능합니다.
+
 ## 주요 기능
 
 | 기능 | 내용 |
@@ -56,8 +61,8 @@ supabase db query --remote=<project-ref> -f supabase/migrations/0001_init.sql
 
 이메일 인증 링크가 앱으로 돌아오도록 Supabase 대시보드 → Authentication → URL Configuration에서 설정합니다.
 
-- Site URL: `http://localhost:3000` (배포 후에는 실제 도메인)
-- Redirect URLs: `http://localhost:3000/**` (배포 도메인도 추가)
+- Site URL: `http://localhost:3000` (배포 후에는 `https://<배포 주소>`, 아래 "배포" 참고)
+- Redirect URLs: `http://localhost:3000/**` (배포 후 `https://<배포 주소>/**`도 추가)
 
 ### 5. 실행
 
@@ -78,6 +83,21 @@ where id = (select id from auth.users where email = '관리자 이메일');
 ```
 
 앱이나 API로는 role을 바꿀 수 없습니다 (아래 권한 구조 참고).
+
+## 배포 (Vercel)
+
+1. Vercel에서 이 GitHub 저장소를 Import 합니다. `main`에 push하면 자동으로 다시 배포됩니다.
+2. Settings → Environment Variables에 **두 개 모두** 등록합니다 (Production·Preview).
+   - Key: `NEXT_PUBLIC_SUPABASE_URL` / Value: `https://<project-ref>.supabase.co`
+   - Key: `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` / Value: `sb_publishable_...`
+   - Key 칸에는 변수 이름, Value 칸에는 `=` 오른쪽 값만 넣습니다.
+3. 환경 변수를 추가·변경한 뒤에는 **Redeploy** 해야 반영됩니다 (`NEXT_PUBLIC_` 값은 빌드 시 포함).
+4. Supabase Auth URL 설정에 배포 주소를 **`https://`로** 등록합니다.
+   - Site URL: `https://<배포 주소>`
+   - Redirect URLs: `https://<배포 주소>/**` (로컬 개발용 `http://localhost:3000/**`도 유지)
+
+> 모든 페이지가 500 오류라면 대부분 환경 변수 누락입니다.
+> Vercel Logs에 `Your project's URL and Key are required…` 또는 `Invalid supabaseUrl…`이 보이면 2번을 다시 확인하세요.
 
 ## 권한 구조
 
