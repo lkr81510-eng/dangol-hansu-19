@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Breadcrumb from "@/components/Breadcrumb";
 import DeleteNoticeButton from "@/components/DeleteNoticeButton";
 import { getViewer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -33,10 +34,14 @@ export default async function NoticeDetailPage({ params, searchParams }: PagePro
   const edited = new Date(notice.updated_at).getTime() - new Date(notice.created_at).getTime() > 60_000;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-5 sm:py-12">
-      <Link href="/notices" className="text-sm font-medium text-stone-500 hover:text-brand-700">
-        ← 공지사항 목록
-      </Link>
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-5 sm:py-8">
+      <Breadcrumb
+        items={[
+          { label: "홈", href: "/" },
+          { label: "공지사항", href: "/notices" },
+          { label: cat.label, href: `/notices?category=${notice.category}` },
+        ]}
+      />
 
       <article className="mt-4 rounded-2xl border border-stone-200 bg-white p-5 sm:p-8">
         <Link

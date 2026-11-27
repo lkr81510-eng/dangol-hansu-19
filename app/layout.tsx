@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <footer className="border-t border-stone-200 bg-white">
-          <div className="mx-auto max-w-5xl px-5 py-8 text-xs leading-relaxed text-stone-500">
+          <div className="mx-auto max-w-6xl px-5 py-8 text-xs leading-relaxed text-stone-500">
             <p className="font-semibold text-stone-700">단골 한수</p>
             <p className="mt-1">단골이 말하고, AI가 정리하고, 식당이 달라집니다.</p>
             <p className="mt-3">© {new Date().getFullYear()} 단골 한수</p>

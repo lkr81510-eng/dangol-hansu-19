@@ -1,25 +1,31 @@
 import Link from "next/link";
+import CategoryIcon from "./CategoryIcon";
 import { CATEGORIES, formatDate, type Notice } from "@/lib/notices";
 
+// 썸네일(분류 색 + 직접 그린 아이콘) 위, 제목·날짜·태그 아래. 카드 테두리 없음.
 export default function NoticeCard({ notice }: { notice: Notice }) {
   const cat = CATEGORIES[notice.category];
   return (
-    <Link
-      href={`/notices/${notice.id}`}
-      className="group flex h-full flex-col rounded-2xl border border-stone-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-md"
-    >
-      <span className={`w-fit rounded-md px-2 py-0.5 text-xs font-semibold ${cat.badge}`}>
-        {cat.label}
-      </span>
-      <h3 className="mt-3 line-clamp-2 text-base font-bold leading-snug text-stone-900 group-hover:text-brand-700">
+    <Link href={`/notices/${notice.id}`} className="group block">
+      <div
+        className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl ${cat.thumb}`}
+      >
+        <span className="transition duration-200 group-hover:scale-110">
+          <CategoryIcon category={notice.category} size={44} />
+        </span>
+        <span className="absolute bottom-2 left-2 rounded-md bg-white/85 px-1.5 py-0.5 text-[11px] font-semibold text-stone-700">
+          {cat.label}
+        </span>
+      </div>
+      <h3 className="mt-2.5 line-clamp-2 text-sm font-semibold leading-snug text-stone-900 group-hover:text-brand-700 sm:text-[15px]">
         {notice.title}
       </h3>
-      <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-stone-600">
-        {notice.content}
-      </p>
-      <time dateTime={notice.created_at} className="mt-4 text-xs text-stone-400">
+      <time dateTime={notice.created_at} className="mt-1 block text-xs text-stone-500">
         {formatDate(notice.created_at)}
       </time>
+      <span className={`mt-2 inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${cat.badge}`}>
+        {cat.label} 공지
+      </span>
     </Link>
   );
 }

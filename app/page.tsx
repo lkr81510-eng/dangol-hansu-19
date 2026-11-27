@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import NoticeCard from "@/components/NoticeCard";
+import CategoryIcon from "@/components/CategoryIcon";
 import { getViewer } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORIES, type Category, type Notice } from "@/lib/notices";
@@ -37,7 +39,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       .from("notices")
       .select("id, category, title, content, created_at, updated_at")
       .order("created_at", { ascending: false })
-      .limit(3),
+      .limit(4),
     getViewer(),
   ]);
   const latest = (data ?? []) as Notice[];
@@ -52,7 +54,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
 
       {/* 히어로 */}
       <section className="border-b border-stone-200 bg-white">
-        <div className="mx-auto max-w-5xl px-5 py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
           <p className="text-sm font-semibold text-brand-600">우리 동네 식당 단골 자문단</p>
           <h1 className="mt-3 text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl sm:leading-tight">
             단골이 말하고,<br />
@@ -77,27 +79,34 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 분류 바로가기 */}
-      <section className="mx-auto max-w-5xl px-4 pt-10 sm:px-5">
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-5">
         <h2 className="text-lg font-bold">어떤 소식을 찾으세요?</h2>
-        <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <ul className="mt-4 grid grid-cols-4 gap-2 sm:max-w-md sm:gap-3">
           {(Object.keys(CATEGORIES) as Category[]).map((key) => (
             <li key={key}>
-              <Link
+              <CategoryShortcut
                 href={`/notices?category=${key}`}
-                className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 transition hover:border-brand-500/40 hover:shadow-sm"
-              >
-                <span className={`rounded-lg px-2.5 py-1 text-sm font-bold ${CATEGORIES[key].badge}`}>
-                  {CATEGORIES[key].label}
-                </span>
-                <span className="text-sm text-stone-600">{CATEGORY_GUIDE[key]}</span>
-              </Link>
+                label={CATEGORIES[key].label}
+                title={CATEGORY_GUIDE[key]}
+                icon={<CategoryIcon category={key} />}
+                tone={CATEGORIES[key].badge}
+              />
             </li>
           ))}
+          <li>
+            <CategoryShortcut
+              href="/notices"
+              label="전체"
+              title="모든 공지 보기"
+              icon={<CategoryIcon category="all" />}
+              tone="bg-white text-stone-600 ring-1 ring-stone-200"
+            />
+          </li>
         </ul>
       </section>
 
       {/* 최근 공지 */}
-      <section className="mx-auto max-w-5xl px-4 pt-12 sm:px-5">
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-5">
         <div className="flex items-end justify-between">
           <h2 className="text-lg font-bold">최근 공지</h2>
           <Link href="/notices" className="text-sm font-semibold text-brand-700 hover:underline">전체 보기 →</Link>
@@ -107,7 +116,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             아직 등록된 공지가 없어요.
           </p>
         ) : (
-          <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-4 grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-4 lg:grid-cols-4 lg:gap-x-5">
             {latest.map((n) => (
               <li key={n.id}><NoticeCard notice={n} /></li>
             ))}
@@ -116,7 +125,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 작동 방식 */}
-      <section className="mx-auto max-w-5xl px-4 pt-14 sm:px-5">
+      <section className="mx-auto max-w-6xl px-4 pt-14 sm:px-5">
         <h2 className="text-lg font-bold">단골 한수는 이렇게 움직여요</h2>
         <ol className="mt-4 grid gap-4 sm:grid-cols-3">
           {STEPS.map((s) => (
@@ -133,7 +142,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       </section>
 
       {/* 준비 중 기능 */}
-      <section id="coming-soon" className="mx-auto max-w-5xl scroll-mt-24 px-4 py-14 sm:px-5">
+      <section id="coming-soon" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-14 sm:px-5">
         <h2 className="text-lg font-bold">곧 만나요</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <FeatureSoon
@@ -147,6 +156,33 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
         </div>
       </section>
     </>
+  );
+}
+
+function CategoryShortcut({
+  href,
+  label,
+  title,
+  icon,
+  tone,
+}: {
+  href: string;
+  label: string;
+  title: string;
+  icon: ReactNode;
+  tone: string;
+}) {
+  return (
+    <Link
+      href={href}
+      title={title}
+      className="group flex flex-col items-center gap-2 rounded-2xl p-2 text-center transition hover:bg-white focus-visible:outline-2 focus-visible:outline-brand-500"
+    >
+      <span className={`flex size-14 items-center justify-center rounded-2xl transition group-hover:scale-105 sm:size-16 ${tone}`}>
+        {icon}
+      </span>
+      <span className="text-sm font-semibold text-stone-700 group-hover:text-brand-700">{label}</span>
+    </Link>
   );
 }
 
